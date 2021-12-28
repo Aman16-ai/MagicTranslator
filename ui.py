@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import font
+from text_speech import speak
 from translate_data import translate_sentence as ts
 import threading
 
@@ -22,22 +23,31 @@ def translate_sentence():
         to_lan = to_lan_var.get()
         print(f"sentence is {sentence}, from is {from_lan} and to is {to_lan}")
         s = ts(from_lan, to_lan, sentence)
-        translated_label.config(text=s)
+        # translated_label.config(text=s)
+        translated_label_var.set(s)
     except Exception as e:
         translated_label.config(text="Something went wrong")
         print(e.message)
 
 def reset_fields():
-    translated_label.config(text="Translate : ")
+    translated_label_var.set("")
     pick_from_language_box.current(0)
     pick_to_language_box.current(0)
     sentence_var.set("")
 
+def speak_sentence_thread():
+    t = threading.Thread(target=speak_sentence)
+    t.start()
+def speak_sentence():
+    sentence = translated_label_var.get()
+    speak(sentence)
 
 # label
 title_label = Label(win, text="Welcome to PyTranslator", font=("Aerial", 15))
 title_label.place(x=200, y=10)
-translated_label = Label(win, text="Translate : ", font=("Aerial", 12))
+
+translated_label_var = StringVar()
+translated_label = Label(win, text="Translate : ", font=("Aerial", 12),textvariable=translated_label_var)
 translated_label.place(x=150, y=190)
 # combobox
 from_lan_var = StringVar()
@@ -69,4 +79,8 @@ translate_btn.place(x=148, y=150)
 Reset_btn = Button(win, text="Reset", width=19, bg="Red",
                    fg="white", command=reset_fields)
 Reset_btn.place(x=302, y=150)
+
+# mic_icon = PhotoImage(file= "E:\python\python projects\Translator\mic.jpg")
+mic_btn = Button(win,text="Speak",fg="white",bg="orange",command=speak_sentence_thread)
+mic_btn.place(x=400,y=190)
 win.mainloop()
